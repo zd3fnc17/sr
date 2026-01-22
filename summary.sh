@@ -57,9 +57,8 @@ printf "%-20s %s\n" "data4:"   "$data4_free"
 cat <<'EOF'
 ⚠️  jangan membuat paket melebihi batas
 - script update versi 1.0 pada 22 Jan 2026
-- gunakan perintah ini jika ingin meng update script 
-----
-cd ~/sr/ && git restore . && git pull && chmod +x *.sh
+- script ini cocok untuk digiOS-5
+- pastikan menggunakan script yang sesuai dan jangan jongkok di toilet duduk
 ----
 EOF
 
