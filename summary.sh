@@ -29,7 +29,7 @@ printf "%-20s %d MB (%.2f GB)\n" \
 
 # ================= DISK ZFS =================
 # mapping:
-# default -> zp0
+# data1 -> zp0
 # data2   -> disk2
 # data3   -> disk3
 # data4   -> disk4
