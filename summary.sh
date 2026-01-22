@@ -27,12 +27,31 @@ echo "--------------------------------------"
 printf "%-20s %d MB (%.2f GB)\n" \
   "TOTAL RAM LIMIT:" "$total_mb" "$(echo "$total_mb/1024" | bc -l)"
 
+# ================= DISK ZFS =================
+# mapping:
+# default -> zp0
+# data2   -> disk2
+# data3   -> disk3
+# data4   -> disk4
+
+zpool_output=$(zpool list -H -o name,free)
+
+get_free() {
+  local pool="$1"
+  local free
+  free=$(echo "$zpool_output" | awk -v p="$pool" '$1==p{print $2}')
+  echo "${free:-tidak ada disk}"
+}
+
+data1_free=$(get_free zp0)
+data2_free=$(get_free disk2)
+data3_free=$(get_free disk3)
+data4_free=$(get_free disk4)
+
+echo "--------------------------------------"
+printf "%-20s %s\n" "data1:" "$data1_free"
+printf "%-20s %s\n" "data2:"   "$data2_free"
+printf "%-20s %s\n" "data3:"   "$data3_free"
+printf "%-20s %s\n" "data4:"   "$data4_free"
+
 echo "⚠️  jangan membuat paket melebihi batas"
-
-echo
-echo "=== STORAGE TERSISA ==="
-df -h /var/snap/lxd/common/lxd/storage-pools/default /data2 \
-  | awk 'NR>1 {printf "%-40s %s\n", $6, $4}' \
-  | sort -h -k2
-
-echo "ℹ️  silakan pilih storage yang paling banyak tersisa"
