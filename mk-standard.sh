@@ -28,7 +28,7 @@ lxc config set $VPS limits.cpu $CPU
 lxc config set $VPS limits.memory $RAM
 lxc config device set $VPS root size=$DISK
 
-PORT=$(shuf -i 10000-60000 -n 1)
+PORT=$(shuf -i 1000-6000 -n 1)
 IP=$(ip route get 1.1.1.1 | awk '{print $7; exit}')
 
 lxc config device add $VPS vnc proxy \
