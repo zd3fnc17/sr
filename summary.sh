@@ -56,6 +56,6 @@ printf "%-20s %s\n" "data4:"   "$data4_free"
 
 cat <<'EOF'
 ⚠️  jangan membuat paket melebihi batas
-- script update versi 1.0 pada 22 Jan 2026
+- script update versi 1.0 pada 22 Jan 2026x
 EOF
 
