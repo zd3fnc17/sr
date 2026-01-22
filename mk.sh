@@ -5,8 +5,10 @@ set -e
 # ===== HELP (DUMMY) =====
 if [[ "$1" == "-h" || "$1" == "--help" ]]; then
   cat <<'EOF'
-cara menggunakannya
+CARA MENGGUNAKAN:
+--------------
 ./mk <namavps> <namapaket> <data2>
+--------------
 apabila ingin menggunakan data1, maka boleh tidak ditulis "data1" 
 EOF
   exit 0
