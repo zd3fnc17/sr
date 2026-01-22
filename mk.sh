@@ -87,6 +87,12 @@ fi
 
 PORT=${NUMBERS: -4}
 
+# ===== JIKA PORT DIAWALI 0, TAMBAH ANGKA 1 =====
+if [[ "$PORT" == 0* ]]; then
+  PORT="1$PORT"
+  PORT=${PORT: -4}
+fi
+
 # ===== CEK PORT =====
 if ss -lnt | awk '{print $4}' | grep -q ":$PORT$"; then
   echo "❌ GAGAL: Port $PORT sudah digunakan"
