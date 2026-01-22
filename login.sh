@@ -8,4 +8,4 @@ fi
 CONTAINER="$1"
 USER="admin"
 
-lxc exec "$CONTAINER" -- su - "$USER"
+lxc exec -t "$CONTAINER" -- su - "$USER"
