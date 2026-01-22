@@ -2,24 +2,17 @@
 set -e
 
 # ===== GLOBAL DEFAULT CONFIG =====
-TEMPLATE="digios-5-data2"
+TEMPLATE="digios5-data2"
 POOL="data2"
 CONNECT_PORT=6112
 
 # ===== HELP =====
 if [[ "$1" == "-h" || "$1" == "--help" ]]; then
   cat <<'EOF'
-CARA MENGGUNAKAN:
---------------
-./mk.sh <paket> <nama_vps>
 
-Contoh:
-./mk.sh standard vps1234
-./mk.sh elite digi5678
+panduan langsung belum tersedia
+bisa langsung tanya pada discord
 
-Catatan:
-- storage otomatis menggunakan: data2
-- nama_vps HARUS diakhiri angka minimal 4 digit
 EOF
   exit 0
 fi
