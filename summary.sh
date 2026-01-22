@@ -54,4 +54,8 @@ printf "%-20s %s\n" "data2:"   "$data2_free"
 printf "%-20s %s\n" "data3:"   "$data3_free"
 printf "%-20s %s\n" "data4:"   "$data4_free"
 
-echo "⚠️  jangan membuat paket melebihi batas"
+cat <<'EOF'
+⚠️  jangan membuat paket melebihi batas
+- script update versi 1.0 pada 22 Jan 2026
+EOF
+
