@@ -1,5 +1,6 @@
-# Abaikan folder di mana pun posisinya
+# Abaikan folder mana pun posisinya
 archive/
+dump/
 
 # Abaikan semua isi di dalamnya (redundan tapi eksplisit)
 archive/**
