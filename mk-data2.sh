@@ -35,7 +35,7 @@ PAKET="$1"
 VPS="$2"
 
 # ===== LOG PROGRESS =====
-echo "▶️ Membuat VPS \"$VPS\" | Paket: $PAKET | Storage: $POOL"
+echo "▶️ Membuat \"$VPS\" | Paket: $PAKET | Storage: $POOL"
 
 # ===== KONFIGURASI PAKET =====
 case "$PAKET" in
@@ -114,11 +114,12 @@ lxc start "$VPS"
 # ===== OUTPUT AKHIR =====
 echo "================================="
 echo "🎉 VPS BERHASIL DIBUAT!"
-echo "VPS      : $VPS"
-echo "PAKET    : $PAKET"
-echo "CPU      : $CPU core"
-echo "RAM      : $RAM"
-echo "DISK     : $DISK"
-echo "STORAGE  : $POOL"
-echo "VNC      : $IP:$PORT"
+echo "VPS       : $VPS"
+echo "PAKET     : $PAKET"
+echo "TEMPLATE  : $TEMPLATE"
+echo "CPU       : $CPU core"
+echo "RAM       : $RAM"
+echo "DISK      : $DISK"
+echo "STORAGE   : $POOL"
+echo "VNC       : $IP:$PORT"
 echo "================================="
