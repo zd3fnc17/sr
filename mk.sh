@@ -7,7 +7,7 @@ if [[ "$1" == "-h" || "$1" == "--help" ]]; then
   cat <<'EOF'
 CARA MENGGUNAKAN:
 --------------
-./mk <namavps> <namapaket> <data2>
+./mk <namavps> <namapaket> <data>
 --------------
 apabila ingin menggunakan data1, maka boleh tidak ditulis "data1" 
 EOF
