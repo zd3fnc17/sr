@@ -77,7 +77,7 @@ done
 
 cat <<'EOF'
 - jangan membuat paket melebihi batas
-- script update versi 1.3 (23 januari 2026)
+- script versi 1.4
 - script ini cocok untuk digiOS-5
 ----
 EOF
