@@ -25,7 +25,7 @@ done < <(lxc list -c n,s,limits.memory --format csv)
 
 echo "--------------------------------------"
 printf "%-20s %d MB (%.2f GB)\n" \
-  "TOTAL RAM LIMIT:" "$total_mb" "$(echo "$total_mb/1024" | bc -l)"
+  "RAM DIGUNAKAN:" "$total_mb" "$(echo "$total_mb/1024" | bc -l)"
 
 # ================= STORAGE + VPS =================
 
