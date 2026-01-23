@@ -1,20 +1,16 @@
 #!/bin/bash
 # DESC: untuk login ke server
 
-### HELP START ###
-show_help() {
-  cat << 'EOF'
-Cara pakai
- ~/login.sh namavps
+#!/bin/bash
+# DESC: login ke server LXC
 
-Description:
-  Login ke container LXC sebagai user admin.
 
-Options:
-  -h, --help    Tampilkan help ini
-EOF
-}
-### HELP END ###
+CONTAINER="$1"
+USER="admin"
+
+lxc exec -t "$CONTAINER" -- su - "$USER"
+
+
 
 
 if [ -z "$1" ]; then
