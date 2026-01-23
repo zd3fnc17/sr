@@ -27,12 +27,17 @@ echo "--------------------------------------"
 printf "%-20s %d MB (%.2f GB)\n" \
   "TOTAL RAM LIMIT:" "$total_mb" "$(echo "$total_mb/1024" | bc -l)"
 
-# ================= DISK ZFS =================
-# mapping:
-# data1 -> zp0
-# data2   -> disk2
-# data3   -> disk3
-# data4   -> disk4
+# ================= STORAGE + VPS =================
+
+echo "--------------------------------------"
+echo "=== INFORMASI STORAGE ==="
+
+declare -A ZPOOL_MAP=(
+  [data1]="zp0"
+  [data2]="disk2"
+  [data3]="disk3"
+  [data4]="disk4"
+)
 
 zpool_output=$(zpool list -H -o name,free)
 
@@ -40,25 +45,39 @@ get_free() {
   local pool="$1"
   local free
   free=$(echo "$zpool_output" | awk -v p="$pool" '$1==p{print $2}')
-  echo "${free:-tidak ada disk}"
+  if [[ -z "$free" ]]; then
+    echo "no disk"
+  else
+    echo "$free"
+  fi
 }
 
-data1_free=$(get_free zp0)
-data2_free=$(get_free disk2)
-data3_free=$(get_free disk3)
-data4_free=$(get_free disk4)
+declare -A VPS_COUNT
+while IFS=, read -r pool count; do
+  VPS_COUNT["$pool"]="$count"
+done < <(
+  lxc list --format json | jq -r '
+    group_by(.devices.root.pool)
+    | map({pool: .[0].devices.root.pool, count: length})
+    | .[]
+    | "\(.pool),\(.count)"
+  '
+)
 
-echo "--------------------------------------"
-printf "%-20s %s\n" "data1:" "$data1_free"
-printf "%-20s %s\n" "data2:"   "$data2_free"
-printf "%-20s %s\n" "data3:"   "$data3_free"
-printf "%-20s %s\n" "data4:"   "$data4_free"
+for storage in data1 data2 data3 data4; do
+  free_disk=$(get_free "${ZPOOL_MAP[$storage]}")
+  vps=${VPS_COUNT[$storage]:-0}
+
+  if [[ "$free_disk" == "no disk" ]]; then
+    printf "%-6s : no disk\n" "$storage"
+  else
+    printf "%-6s : %s VPS | free %s\n" "$storage" "$vps" "$free_disk"
+  fi
+done
 
 cat <<'EOF'
-⚠️  jangan membuat paket melebihi batas
-- script update versi 1.0 pada 22 Jan 2026
+- jangan membuat paket melebihi batas
+- script update versi 1.3 (23 januari 2026)
 - script ini cocok untuk digiOS-5
-- pastikan menggunakan script yang sesuai dan jangan jongkok di toilet duduk
 ----
 EOF
-
