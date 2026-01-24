@@ -69,4 +69,4 @@ done
 echo "🧹 Bersih-bersih selesai."
 echo
 
-echo "🏁 Proses selesai, cek LOG untuk memastikan apakah proses berhasil atau tidak"
+echo "🏁 Proses selesai, cek Log untuk memastikan apakah proses berhasil atau tidak"
