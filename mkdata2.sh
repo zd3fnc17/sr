@@ -94,6 +94,13 @@ if ss -lnt | awk '{print $4}' | grep -q ":$PORT$"; then
   exit 1
 fi
 
+# ===== CEK TEMPLATE =====
+if ! lxc list "$TEMPLATE" --format csv -c n | grep -qx "$TEMPLATE"; then
+  echo "❌ GAGAL: Template Master OS tidak ditemukan, silakan lihat panduan untuk menambahkan"
+  exit 1
+fi
+
+
 # ===== PROVISIONING =====
 lxc copy "$TEMPLATE" "$VPS" --storage "$POOL"
 
