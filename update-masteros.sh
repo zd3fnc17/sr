@@ -1,14 +1,12 @@
 #!/bin/bash
 
-# Konfigurasi nama OS
 OS_VERSION="digios7"
-# Konfigurasi yang di cek. kalau memang sudah ada berati tidak perlu dilanjut
 CHECK_VPS="digios7-data1"
 
 ARCHIVE_URL="https://srv.sgp1.cdn.digitaloceanspaces.com/masterlxd/${OS_VERSION}.tar.gz"
 STORAGE_POOLS=("data1" "data2" "data3" "data4")
 
-# digios sebelumnya yang mungkin perlu dihapus
+# ===== LIST MASTER OS LAMA YANG MAU DIBERSIHKAN =====
 CLEANUP_INSTANCES=(
     "digios5-data1"
     "digios5-data2"
@@ -19,36 +17,30 @@ CLEANUP_INSTANCES=(
 WORKDIR="$HOME/masteros"
 ARCHIVE_FILE="${OS_VERSION}.tar.gz"
 
-# ===== FUNGSI BERSIH-BERSIH =====
-cleanup_old_masteros() {
-    echo
-    echo "🧹 Mulai proses bersih-bersih Master OS lama..."
+echo "🧹 Mulai proses bersih-bersih Master OS lama..."
 
-    for INSTANCE in "${CLEANUP_INSTANCES[@]}"; do
-        if lxc info "$INSTANCE" >/dev/null 2>&1; then
-            echo "▶️  Menghapus instance $INSTANCE ..."
-            if lxc delete "$INSTANCE" --force; then
-                echo "✅ $INSTANCE berhasil dihapus"
-            else
-                echo "⚠️  Gagal menghapus $INSTANCE"
-            fi
+for INSTANCE in "${CLEANUP_INSTANCES[@]}"; do
+    if lxc info "$INSTANCE" >/dev/null 2>&1; then
+        echo "▶️  Menghapus instance $INSTANCE ..."
+        if lxc delete "$INSTANCE" --force; then
+            echo "✅ $INSTANCE berhasil dihapus"
         else
-            echo "ℹ️  $INSTANCE tidak ada (sudah bersih)"
+            echo "⚠️  Gagal menghapus $INSTANCE"
         fi
-    done
+    else
+        echo "ℹ️  $INSTANCE tidak ada (sudah bersih)"
+    fi
+done
 
-    echo "🧹 Bersih-bersih selesai."
-    echo
-}
+echo "🧹 Bersih-bersih selesai."
+echo
 
-# ===== CEK MASTER OS BARU (DILAKUKAN PERTAMA) =====
+# ===== CEK MASTER OS BARU =====
 if lxc info "$CHECK_VPS" >/dev/null 2>&1; then
     echo "ℹ️  Master OS sudah ada ($CHECK_VPS)."
-    cleanup_old_masteros
     exit 0
 fi
 
-# ===== MASTER OS BELUM ADA =====
 read -p "Master OS $OS_VERSION belum ada. Tambahkan sekarang? (y/n): " confirm
 [[ "$confirm" != "y" && "$confirm" != "Y" ]] && exit 0
 
@@ -72,8 +64,5 @@ done
 
 cd ~
 rm -rf "$WORKDIR"
-
-# ===== BERSIH-BERSIH SETELAH MASTER OS ADA =====
-cleanup_old_masteros
 
 echo "🏁 Proses selesai."
