@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #############################################
-# BAGIAN YANG BOLEH / PERLU DIUBAH
+# BAGIAN YANG BOLEH DIUBAH
 #############################################
 
 OS_VERSION="digios6"
@@ -17,14 +17,13 @@ STORAGE_POOLS=("data1" "data2" "data3" "data4")
 WORKDIR="$HOME/masteros"
 ARCHIVE_FILE="${OS_VERSION}.tar.gz"
 
-# === PENGECEKAN UTAMA ===
-if lxc list -c n --format csv | grep -qx "$CHECK_VPS"; then
+# === CEK MASTER OS ===
+if lxc list | awk '{print $1}' | grep -qx "$CHECK_VPS"; then
     echo "ℹ️  Master OS sudah ada ($CHECK_VPS)."
     echo "   Proses tidak dilanjutkan."
     exit 0
 fi
 
-# Konfirmasi user
 read -p "Master OS $OS_VERSION belum ada. Tambahkan sekarang? (y/n): " confirm
 if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
     echo "⏹️  Proses dibatalkan."
@@ -41,7 +40,7 @@ wget "$ARCHIVE_URL" || exit 1
 for POOL in "${STORAGE_POOLS[@]}"; do
     NAME="${OS_VERSION}-${POOL}"
 
-    if ! lxc storage list -c n --format csv | grep -qx "$POOL"; then
+    if ! lxc storage list | awk '{print $1}' | grep -qx "$POOL"; then
         echo "⚠️  Storage $POOL tidak ada, dilewati."
         continue
     fi
@@ -53,4 +52,4 @@ done
 cd ~
 rm -rf "$WORKDIR"
 
-echo "✅ Master OS $OS_VERSION berhasil ditambahkan."
+echo "✅ Proses penambahan Master OS selesai."
