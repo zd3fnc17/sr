@@ -1,19 +1,41 @@
 #!/bin/bash
 
+CACHE_FILE="/home/ubuntu/cache/lxd-proxy-index.tsv"
+
 show_help() {
   cat <<EOF
+Cari VPS berdasarkan IP:PORT menggunakan cache proxy LXD
+
 Usage:
   $0 IP:PORT [IP:PORT ...]
   $0 -f file.txt
+  $0 -h | --help
+
+Contoh:
+  $0 51.79.228.218:1033 51.79.228.218:1037
+  $0 -f ports.txt
+
+Catatan:
+  - Data diambil dari cache:
+    $CACHE_FILE
+  - IP diabaikan, pencocokan berdasarkan PORT
+  - Output berupa bash for-loop siap dieksekusi
 EOF
   exit 0
 }
 
+[ ! -f "$CACHE_FILE" ] && {
+  echo "# Cache tidak ditemukan:"
+  echo "# $CACHE_FILE"
+  echo "# Jalankan ./cache-proxy.sh terlebih dahulu"
+  exit 1
+}
+
 [ -z "$1" ] && show_help
 
+# ambil target port
 TARGET_PORTS=()
 
-# ambil port dari input
 if [ "$1" = "-f" ]; then
   [ -z "$2" ] && echo "File tidak ada" && exit 1
   while read line; do
@@ -28,25 +50,12 @@ fi
 
 declare -A VPS_MATCH
 
-# ambil daftar VPS TANPA pipe
-VPS_LIST=$(lxc list --format csv -c n)
-
-for VPS in $VPS_LIST; do
-  DEV_LIST=$(lxc config device list "$VPS")
-  for dev in $DEV_LIST; do
-    TYPE=$(lxc config device get "$VPS" "$dev" type 2>/dev/null)
-    [ "$TYPE" != "proxy" ] && continue
-
-    LISTEN=$(lxc config device get "$VPS" "$dev" listen)
-    [ -z "$LISTEN" ] && continue
-
-    PORT="${LISTEN##*:}"
-
-    for tp in "${TARGET_PORTS[@]}"; do
-      if [ "$PORT" = "$tp" ]; then
-        VPS_MATCH["$VPS"]=1
-      fi
-    done
+# lookup ke cache
+for p in "${TARGET_PORTS[@]}"; do
+  awk -v port="$p" '
+    NR>1 && $2==port {print $5}
+  ' "$CACHE_FILE" | while read vps; do
+    VPS_MATCH["$vps"]=1
   done
 done
 
