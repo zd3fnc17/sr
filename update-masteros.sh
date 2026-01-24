@@ -17,30 +17,14 @@ CLEANUP_INSTANCES=(
 WORKDIR="$HOME/masteros"
 ARCHIVE_FILE="${OS_VERSION}.tar.gz"
 
-echo "🧹 Mulai proses bersih-bersih Master OS lama..."
-
-for INSTANCE in "${CLEANUP_INSTANCES[@]}"; do
-    if lxc info "$INSTANCE" >/dev/null 2>&1; then
-        echo "▶️  Menghapus instance $INSTANCE ..."
-        if lxc delete "$INSTANCE" --force; then
-            echo "✅ $INSTANCE berhasil dihapus"
-        else
-            echo "⚠️  Gagal menghapus $INSTANCE"
-        fi
-    else
-        echo "ℹ️  $INSTANCE tidak ada (sudah bersih)"
-    fi
-done
-
-echo "🧹 Bersih-bersih selesai."
-echo
-
-# ===== CEK MASTER OS BARU =====
+# ===== CEK MASTER OS BARU (HARD STOP) =====
 if lxc info "$CHECK_VPS" >/dev/null 2>&1; then
-    echo "ℹ️  Master OS sudah ada ($CHECK_VPS)."
+    echo "ℹ️  Master OS $OS_VERSION sudah ada ($CHECK_VPS)."
+    echo "⛔ Tidak ada proses yang dijalankan."
     exit 0
 fi
 
+# ===== MASTER OS BELUM ADA =====
 read -p "Master OS $OS_VERSION belum ada. Tambahkan sekarang? (y/n): " confirm
 [[ "$confirm" != "y" && "$confirm" != "Y" ]] && exit 0
 
@@ -64,5 +48,25 @@ done
 
 cd ~
 rm -rf "$WORKDIR"
+
+# ===== BERSIH-BERSIH SETELAH MASTER BARU ADA =====
+echo
+echo "🧹 Mulai proses bersih-bersih Master OS lama..."
+
+for INSTANCE in "${CLEANUP_INSTANCES[@]}"; do
+    if lxc info "$INSTANCE" >/dev/null 2>&1; then
+        echo "▶️  Menghapus instance $INSTANCE ..."
+        if lxc delete "$INSTANCE" --force; then
+            echo "✅ $INSTANCE berhasil dihapus"
+        else
+            echo "⚠️  Gagal menghapus $INSTANCE"
+        fi
+    else
+        echo "ℹ️  $INSTANCE tidak ada (sudah bersih)"
+    fi
+done
+
+echo "🧹 Bersih-bersih selesai."
+echo
 
 echo "🏁 Proses selesai."
