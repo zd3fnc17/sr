@@ -1,7 +1,9 @@
 #!/bin/bash
 
-CACHE_DIR="$HOME/cache"
-CACHE_FILE="$CACHE_DIR/lxd-proxy-index.tsv"
+CACHE_FILE="/home/ubuntu/cache/lxd-proxy-index.tsv"
+CACHE_DIR="$(dirname "$CACHE_FILE")"
+
+NOW="$(date '+%Y-%m-%d %H:%M:%S')"
 
 show_help() {
   cat <<EOF
@@ -12,44 +14,41 @@ Usage:
 
 Options:
   -h, --help     Tampilkan bantuan
-  --rebuild      Paksa rebuild cache (hapus cache lama dulu)
+  --rebuild      Rebuild cache proxy (default behavior)
 
 Deskripsi:
-  Script ini membangun index proxy LXD yang berisi:
-    - LISTEN_IP      : IP di host (proxy.listen)
-    - LISTEN_PORT    : Port di host
-    - CONNECT_IP     : IP tujuan di VPS (proxy.connect)
-    - CONNECT_PORT   : Port tujuan di VPS
-    - VPS_NAME       : Nama VPS / container
-    - PROXY_NAME     : Nama device proxy (alias port)
+  Script ini membangun cache proxy LXD berisi:
+    - LISTEN_IP
+    - LISTEN_PORT
+    - CONNECT_IP
+    - CONNECT_PORT
+    - VPS_NAME
+    - PROXY_NAME
+
+Metadata:
+  - Lokasi cache
+  - Waktu terakhir diperbarui
 
 Output:
   $CACHE_FILE
-
-Contoh:
-  $0
-  $0 --rebuild
-
-Catatan:
-  - 0.0.0.0 / [::] berarti listen di semua IP host
-  - Script ini TIDAK melakukan suspend / stop VPS
 EOF
   exit 0
 }
 
-# arg parsing
 case "$1" in
   -h|--help)
     show_help
-    ;;
-  --rebuild)
-    rm -f "$CACHE_FILE"
     ;;
 esac
 
 mkdir -p "$CACHE_DIR"
 
-echo -e "LISTEN_IP\tLISTEN_PORT\tCONNECT_IP\tCONNECT_PORT\tVPS_NAME\tPROXY_NAME" > "$CACHE_FILE"
+{
+  echo "# PROXY_CACHE_FILE=$CACHE_FILE"
+  echo "# UPDATED_AT=$NOW"
+  echo "# FORMAT=LISTEN_IP LISTEN_PORT CONNECT_IP CONNECT_PORT VPS_NAME PROXY_NAME"
+  echo -e "LISTEN_IP\tLISTEN_PORT\tCONNECT_IP\tCONNECT_PORT\tVPS_NAME\tPROXY_NAME"
+} > "$CACHE_FILE"
 
 VPS_LIST=$(lxc list --format csv -c n)
 
@@ -65,20 +64,19 @@ for VPS in $VPS_LIST; do
     [ -z "$LISTEN" ] && continue
     [ -z "$CONNECT" ] && continue
 
-    # LISTEN
     L_RAW="${LISTEN##*://}"
     L_IP="${L_RAW%%:*}"
     L_PORT="${L_RAW##*:}"
-    [ -z "$L_IP" ] && L_IP="0.0.0.0"
+    [ -z "$L_IP" ] && L_IP="tcp"
 
-    # CONNECT
     C_RAW="${CONNECT##*://}"
     C_IP="${C_RAW%%:*}"
     C_PORT="${C_RAW##*:}"
 
-    echo -e "$L_IP\t$L_PORT\t$C_IP\t$C_PORT\t$VPS\t$dev" >> "$CACHE_FILE"
+    echo -e "$L_IP\t$L_PORT\t$C_IP\t$C_PORT\t$VPS\t$dev"
   done
-done
+done >> "$CACHE_FILE"
 
-echo "Cache proxy LXD berhasil dibuat:"
-echo "  $CACHE_FILE"
+echo "Proxy cache berhasil diperbarui"
+echo "  Lokasi : $CACHE_FILE"
+echo "  Waktu  : $NOW"
