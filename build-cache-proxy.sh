@@ -1,4 +1,5 @@
 #!/bin/bash
+# DESC: untuk memperbarui cache proxy. nanti digunakan untuk banyak keperluan
 
 CACHE_FILE="/home/ubuntu/cache/lxd-proxy-index.tsv"
 CACHE_DIR="$(dirname "$CACHE_FILE")"
