@@ -4,6 +4,7 @@ CACHE_FILE="/home/ubuntu/cache/lxd-proxy-index.tsv"
 CACHE_DIR="$(dirname "$CACHE_FILE")"
 
 NOW="$(date '+%Y-%m-%d %H:%M:%S')"
+COUNT=0
 
 show_help() {
   cat <<EOF
@@ -43,6 +44,11 @@ esac
 
 mkdir -p "$CACHE_DIR"
 
+echo "Memulai proses build proxy cache..."
+echo "Target cache : $CACHE_FILE"
+echo "Waktu mulai  : $NOW"
+echo
+
 {
   echo "# PROXY_CACHE_FILE=$CACHE_FILE"
   echo "# UPDATED_AT=$NOW"
@@ -53,6 +59,7 @@ mkdir -p "$CACHE_DIR"
 VPS_LIST=$(lxc list --format csv -c n)
 
 for VPS in $VPS_LIST; do
+  echo "→ Memproses VPS: $VPS"
   DEV_LIST=$(lxc config device list "$VPS")
   for dev in $DEV_LIST; do
     TYPE=$(lxc config device get "$VPS" "$dev" type 2>/dev/null)
@@ -73,10 +80,13 @@ for VPS in $VPS_LIST; do
     C_IP="${C_RAW%%:*}"
     C_PORT="${C_RAW##*:}"
 
-    echo -e "$L_IP\t$L_PORT\t$C_IP\t$C_PORT\t$VPS\t$dev"
+    echo -e "$L_IP\t$L_PORT\t$C_IP\t$C_PORT\t$VPS\t$dev" >> "$CACHE_FILE"
+    COUNT=$((COUNT+1))
   done
-done >> "$CACHE_FILE"
+done
 
+echo
 echo "Proxy cache berhasil diperbarui"
-echo "  Lokasi : $CACHE_FILE"
-echo "  Waktu  : $NOW"
+echo "  Lokasi      : $CACHE_FILE"
+echo "  Waktu       : $NOW"
+echo "  Total entry : $COUNT"
