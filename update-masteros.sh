@@ -25,7 +25,7 @@ if lxc info "$CHECK_VPS" >/dev/null 2>&1; then
 fi
 
 # ===== MASTER OS BELUM ADA =====
-read -p "Master OS $OS_VERSION belum ada. Tambahkan sekarang? (y/n): " confirm
+read -p "Master OS $OS_VERSION ($CHECK_VPS) belum ada. Tambahkan sekarang? (y/n): " confirm
 [[ "$confirm" != "y" && "$confirm" != "Y" ]] && exit 0
 
 echo "▶️  Menambahkan Master OS $OS_VERSION..."
