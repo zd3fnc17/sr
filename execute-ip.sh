@@ -4,7 +4,8 @@ CACHE_FILE="/home/ubuntu/cache/lxd-proxy-index.tsv"
 
 show_help() {
   cat <<EOF
-Suspend VPS berdasarkan IP:PORT (berdasarkan cache proxy)
+Generate perintah suspend / terminate VPS berdasarkan IP:PORT
+(menggunakan cache proxy)
 
 Usage:
   $0 IP:PORT [IP:PORT ...]
@@ -12,9 +13,9 @@ Usage:
   $0 -h | --help
 
 Catatan:
-  - Menggunakan data dari cache proxy
   - IP diabaikan, pencocokan berdasarkan PORT
-  - Output berupa bash for-loop (tidak dieksekusi otomatis)
+  - Data diambil dari cache proxy
+  - Output hanya berupa perintah (tidak dieksekusi)
 
 Cache:
   $CACHE_FILE
@@ -56,24 +57,34 @@ fi
 
 declare -A VPS_MATCH
 
-# lookup ke cache (tanpa subshell)
+# lookup VPS dari cache (tanpa subshell)
 for p in "${TARGET_PORTS[@]}"; do
   while read vps; do
     VPS_MATCH["$vps"]=1
   done < <(
-    awk -v port="$p" '
-      NR>1 && $2==port {print $5}
-    ' "$CACHE_FILE"
+    awk -v port="$p" 'NR>1 && $2==port {print $5}' "$CACHE_FILE"
   )
 done
 
-# output
+# validasi hasil
 if [ "${#VPS_MATCH[@]}" -eq 0 ]; then
   echo "# Tidak ada VPS yang cocok berdasarkan cache"
   exit 0
 fi
 
-echo "for v in ${!VPS_MATCH[@]}; do"
+VPS_LIST="${!VPS_MATCH[@]}"
+
+# ================= OUTPUT =================
+
+echo "# ===== SUSPEND VPS ====="
+echo "for v in $VPS_LIST; do"
 echo "  lxc stop \$v"
 echo "  lxc config set \$v boot.autostart false"
+echo "done"
+echo
+
+echo "# ===== TERMINATE VPS ====="
+echo "for v in $VPS_LIST; do"
+echo "  lxc stop \$v"
+echo "  lxc delete \$v"
 echo "done"
