@@ -2,7 +2,7 @@
 set -e
 
 # ===== GLOBAL DEFAULT CONFIG =====
-TEMPLATE="digios5-data1"
+TEMPLATE="digios6-data1"
 POOL="data1"
 CONNECT_PORT=6112
 
