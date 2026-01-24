@@ -68,6 +68,13 @@ case "$PAKET" in
     ;;
 esac
 
+# ===== CEK TEMPLATE =====
+if ! lxc list "$TEMPLATE" --format csv -c n | grep -qx "$TEMPLATE"; then
+  echo "❌ GAGAL: Template Master OS tidak ditemukan, silakan lihat panduan untuk menambahkan"
+  exit 1
+fi
+
+
 # ===== VALIDASI NAMA VPS (PORT DARI 4 DIGIT TERAKHIR) =====
 NUMBERS=$(echo "$VPS" | grep -o '[0-9]*$')
 
