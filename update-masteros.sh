@@ -1,34 +1,22 @@
 #!/bin/bash
 
-#############################################
-# BAGIAN YANG BOLEH DIUBAH
-#############################################
-
 OS_VERSION="digios6"
 CHECK_VPS="digios6-data1"
 
 ARCHIVE_URL="https://srv.sgp1.cdn.digitaloceanspaces.com/masterlxd/${OS_VERSION}.tar.gz"
 STORAGE_POOLS=("data1" "data2" "data3" "data4")
 
-#############################################
-# JANGAN DIUBAH
-#############################################
-
 WORKDIR="$HOME/masteros"
 ARCHIVE_FILE="${OS_VERSION}.tar.gz"
 
-# === CEK MASTER OS ===
-if lxc list | awk '{print $1}' | grep -qx "$CHECK_VPS"; then
+# Cek Master OS (flag)
+if lxc info "$CHECK_VPS" >/dev/null 2>&1; then
     echo "ℹ️  Master OS sudah ada ($CHECK_VPS)."
-    echo "   Proses tidak dilanjutkan."
     exit 0
 fi
 
 read -p "Master OS $OS_VERSION belum ada. Tambahkan sekarang? (y/n): " confirm
-if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
-    echo "⏹️  Proses dibatalkan."
-    exit 0
-fi
+[[ "$confirm" != "y" && "$confirm" != "Y" ]] && exit 0
 
 echo "▶️  Menambahkan Master OS $OS_VERSION..."
 
@@ -39,17 +27,16 @@ wget "$ARCHIVE_URL" || exit 1
 
 for POOL in "${STORAGE_POOLS[@]}"; do
     NAME="${OS_VERSION}-${POOL}"
+    echo "▶️  Import ke storage $POOL..."
 
-    if ! lxc storage list | awk '{print $1}' | grep -qx "$POOL"; then
-        echo "⚠️  Storage $POOL tidak ada, dilewati."
-        continue
+    if lxc import "$ARCHIVE_FILE" "$NAME" --storage "$POOL"; then
+        echo "✅ Berhasil di $POOL"
+    else
+        echo "⚠️  Gagal di $POOL (kemungkinan storage tidak ada)"
     fi
-
-    echo "▶️  Import ke $POOL..."
-    lxc import "$ARCHIVE_FILE" "$NAME" --storage "$POOL" || exit 1
 done
 
 cd ~
 rm -rf "$WORKDIR"
 
-echo "✅ Proses penambahan Master OS selesai."
+echo "🏁 Proses selesai."
