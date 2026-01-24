@@ -1,14 +1,10 @@
 #!/bin/bash
 
-
 show_help() {
   cat <<EOF
 Usage:
   $0 IP:PORT [IP:PORT ...]
   $0 -f file.txt
-
-Output:
-  for v in vps1 vps2; do ...
 EOF
   exit 0
 }
@@ -17,7 +13,7 @@ EOF
 
 TARGET_PORTS=()
 
-# ambil input
+# ambil port dari input
 if [ "$1" = "-f" ]; then
   [ -z "$2" ] && echo "File tidak ada" && exit 1
   while read line; do
@@ -32,9 +28,12 @@ fi
 
 declare -A VPS_MATCH
 
-# scan semua VPS
-lxc list --format csv -c n | while read VPS; do
-  lxc config device list "$VPS" | while read dev; do
+# ambil daftar VPS TANPA pipe
+VPS_LIST=$(lxc list --format csv -c n)
+
+for VPS in $VPS_LIST; do
+  DEV_LIST=$(lxc config device list "$VPS")
+  for dev in $DEV_LIST; do
     TYPE=$(lxc config device get "$VPS" "$dev" type 2>/dev/null)
     [ "$TYPE" != "proxy" ] && continue
 
