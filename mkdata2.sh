@@ -33,27 +33,32 @@ echo "▶️ Membuat \"$VPS\" | Paket: $PAKET | Storage: $POOL"
 # ===== KONFIGURASI PAKET =====
 case "$PAKET" in
   standard)
-    CPU=1
+    CPU=2          # dulu 1 core
+    CPU_ALLOW=50%
     RAM=2001MB
     DISK=30GB
     ;;
   prime)
-    CPU=1
+    CPU=2          # dulu 1 core
+    CPU_ALLOW=50%
     RAM=4002MB
     DISK=50GB
     ;;
   elite)
-    CPU=2
+    CPU=4          # dulu 2 core
+    CPU_ALLOW=50%
     RAM=6003MB
     DISK=60GB
     ;;
   supreme)
-    CPU=2
+    CPU=4          # dulu 2 core
+    CPU_ALLOW=50%
     RAM=8004MB
     DISK=70GB
     ;;
   royal)
-    CPU=3
+    CPU=6          # dulu 3 core
+    CPU_ALLOW=50%
     RAM=10005MB
     DISK=80GB
     ;;
@@ -93,6 +98,7 @@ fi
 lxc copy "$TEMPLATE" "$VPS" --storage "$POOL"
 
 lxc config set "$VPS" limits.cpu "$CPU"
+lxc config set "$VPS" limits.cpu.allowance "$CPU_ALLOW"
 lxc config set "$VPS" limits.memory "$RAM"
 lxc config device set "$VPS" root size="$DISK"
 
@@ -110,7 +116,7 @@ echo "🎉 VPS BERHASIL DIBUAT!"
 echo "VPS       : $VPS"
 echo "PAKET     : $PAKET"
 echo "TEMPLATE  : $TEMPLATE"
-echo "CPU       : $CPU core"
+# echo "CPU       : $CPU core (50%)"
 echo "RAM       : $RAM"
 echo "DISK      : $DISK"
 echo "STORAGE   : $POOL"
