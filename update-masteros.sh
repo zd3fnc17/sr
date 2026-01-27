@@ -20,7 +20,7 @@ ARCHIVE_FILE="${OS_VERSION}.tar.gz"
 # ===== CEK MASTER OS BARU (HARD STOP) =====
 if lxc info "$CHECK_VPS" >/dev/null 2>&1; then
     echo "ℹ️  Master OS $OS_VERSION sudah ada ($CHECK_VPS)."
-    echo "ℹ️  Penambahan Master OS tidak dijalankan."
+    echo "ℹ️  Penambahan Master OS tidak dijalankan, Hanya memperbarui script."
     exit 0
 fi
 
