@@ -1,13 +1,13 @@
 #!/bin/bash
 
 if [ "$#" -eq 0 ]; then
-  echo "❌ Tidak ada container yang diberikan"
+  echo "❌ Tidak ada vps yang diberikan"
   echo "👉 Contoh: ~/sr/terminate.sh vps1 vps2"
   exit 1
 fi
 
 echo "⚠️  PERINGATAN"
-echo "Tindakan ini akan MENGHAPUS container berikut:"
+echo "Tindakan ini akan MENGHAPUS vps berikut:"
 echo "👉 $*"
 echo
 
@@ -26,7 +26,7 @@ esac
 
 for v in "$@"; do
   if ! lxc info "$v" >/dev/null 2>&1; then
-    echo "❌ $v : container tidak ditemukan"
+    echo "❌ $v : vps tidak ditemukan"
     echo "-----------------------------"
     continue
   fi
