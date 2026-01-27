@@ -30,10 +30,11 @@ echo "CPU Cores       : $CPU_CORES"
 echo "Total RAM       : ${RAM_TOTAL_GB} GB"
 echo
 
-# Disk hardware info
+# Disk hardware info (tanpa loop device)
 echo "Disk Hardware:"
-lsblk -d -o NAME,SIZE,MODEL | sed 1d | while read -r name size model; do
-    echo "- /dev/$name : $size ${model:-"(unknown)"}"
+lsblk -d -e 7 -o NAME,SIZE,MODEL | tail -n +2 | while read -r name size model; do
+    [[ -z "$model" ]] && model="unknown"
+    echo "- /dev/$name : $size $model"
 done
 echo
 
@@ -50,4 +51,10 @@ if [[ -f "$AUTH_KEYS" ]]; then
         for (i=3; i<=NF; i++) {
             comment = comment $i (i<NF ? " " : "")
         }
-        if
+        if (comment == "") comment="(no comment)"
+        print "- " comment
+    }
+    ' "$AUTH_KEYS"
+else
+    echo "- (authorized_keys tidak ditemukan)"
+fi
