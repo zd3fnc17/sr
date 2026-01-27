@@ -148,7 +148,7 @@ case "$MODE" in
 -p)
   awk -F'\t' '
     $2 ~ /^[0-9]+$/ {
-      print $5 "-" "'"$HOST_IP"':" $2
+      print $5 "=" "'"$HOST_IP"':" $2
     }
   ' "$CACHE_FILE"
   ;;
