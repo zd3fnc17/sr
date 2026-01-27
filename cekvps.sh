@@ -27,17 +27,20 @@ Usage:
       Tampilkan bantuan
 
 Catatan:
-- Script membaca cache terlebih dahulu
+- Cache dibaca terlebih dahulu
 - Cache hanya dibangun ulang jika daftar VPS berubah
-- Build cache menampilkan progres per VPS
+- Saat build cache, progres per VPS ditampilkan
 EOF
   exit 0
 }
 
 ########################################
-# ARGUMENT
+# ARGUMENT HANDLING
 ########################################
 MODE="$1"
+
+# tanpa argumen → help
+[ -z "$MODE" ] && show_help
 
 case "$MODE" in
   -h|--help)
@@ -101,11 +104,8 @@ if [ "$NEED_BUILD" -eq 1 ]; then
       connect=$(lxc config device get "$VPS" "$dev" connect)
       [ -z "$listen" ] || [ -z "$connect" ] && continue
 
-      L_RAW="${listen##*://}"
-      L_PORT="${L_RAW##*:}"
-
-      C_RAW="${connect##*://}"
-      C_PORT="${C_RAW##*:}"
+      L_PORT="${listen##*:}"
+      C_PORT="${connect##*:}"
 
       echo -e "0.0.0.0\t$L_PORT\t127.0.0.1\t$C_PORT\t$VPS\t$dev" >> "$CACHE_FILE"
     done
@@ -124,7 +124,7 @@ fi
 # OUTPUT MODE
 ########################################
 case "$MODE" in
-  --all|"")
+  --all)
     printf "%-15s %-22s %-10s %s\n" "VPS_NAME" "IP:PORT" "STATUS" "PROXY"
     echo "---------------------------------------------------------------"
 
