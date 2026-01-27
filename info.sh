@@ -16,7 +16,7 @@ SSH_PORT_RUNNING=${SSH_PORT_RUNNING:-22}
 CPU_NAME=$(awk -F: '/model name/ {print $2; exit}' /proc/cpuinfo | sed 's/^ //')
 CPU_CORES=$(nproc)
 
-# RAM info (MB & GB)
+# RAM info
 RAM_TOTAL_MB=$(free -m | awk '/Mem:/ {print $2}')
 RAM_TOTAL_GB=$(awk "BEGIN {printf \"%.2f\", $RAM_TOTAL_MB/1024}")
 
@@ -30,9 +30,15 @@ echo "CPU Cores       : $CPU_CORES"
 echo "Total RAM       : ${RAM_TOTAL_GB} GB"
 echo
 
+# Disk hardware info
+echo "Disk Hardware:"
+lsblk -d -o NAME,SIZE,MODEL | sed 1d | while read -r name size model; do
+    echo "- /dev/$name : $size ${model:-"(unknown)"}"
+done
+echo
+
 # Authorized keys
 AUTH_KEYS="$HOME/.ssh/authorized_keys"
-
 echo "Authorized SSH Public Keys (comments):"
 
 if [[ -f "$AUTH_KEYS" ]]; then
@@ -44,10 +50,4 @@ if [[ -f "$AUTH_KEYS" ]]; then
         for (i=3; i<=NF; i++) {
             comment = comment $i (i<NF ? " " : "")
         }
-        if (comment == "") comment="(no comment)"
-        print "- " comment
-    }
-    ' "$AUTH_KEYS"
-else
-    echo "- (authorized_keys tidak ditemukan)"
-fi
+        if
