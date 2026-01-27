@@ -1,5 +1,5 @@
 #!/bin/bash
-# DESC: Proxy cache checker (VPS name only, ultra fast)
+# DESC: Proxy cache checker (VPS-name based, fast & informative)
 
 CACHE_FILE="/home/ubuntu/cache/lxd-proxy-index.tsv"
 CACHE_DIR="$(dirname "$CACHE_FILE")"
@@ -7,9 +7,10 @@ HOST_IP=$(hostname -I | awk '{print $1}')
 NOW="$(date '+%Y-%m-%d %H:%M:%S')"
 
 ########################################
-# GET LIVE VPS LIST (VERY LIGHT)
+# GET LIVE VPS LIST (LIGHT)
 ########################################
-LIVE_VPS_LIST=$(lxc list --format csv -c n | sort | tr '\n' ',' | sed 's/,$//')
+mapfile -t VPS_ARRAY < <(lxc list --format csv -c n | sort)
+LIVE_VPS_LIST=$(printf "%s," "${VPS_ARRAY[@]}" | sed 's/,$//')
 
 ########################################
 # READ CACHE VPS LIST
@@ -31,10 +32,18 @@ elif [ "$LIVE_VPS_LIST" != "$CACHE_VPS_LIST" ]; then
 fi
 
 ########################################
-# BUILD CACHE (ONLY IF NEEDED)
+# BUILD CACHE (IF NEEDED)
 ########################################
 if [ "$NEED_BUILD" -eq 1 ]; then
   echo "=== BUILD PROXY CACHE ==="
+  echo "Waktu : $NOW"
+  echo "VPS yang terdeteksi:"
+  for vps in "${VPS_ARRAY[@]}"; do
+    echo "  - $vps"
+  done
+  echo "Memproses proxy..."
+  echo
+
   mkdir -p "$CACHE_DIR"
 
   {
@@ -46,7 +55,7 @@ if [ "$NEED_BUILD" -eq 1 ]; then
   } > "$CACHE_FILE"
 
   COUNT=0
-  lxc list --format csv -c n | while read VPS; do
+  for VPS in "${VPS_ARRAY[@]}"; do
     lxc config device list "$VPS" | while read dev; do
       type=$(lxc config device get "$VPS" "$dev" type 2>/dev/null)
       [ "$type" != "proxy" ] && continue
@@ -68,10 +77,13 @@ if [ "$NEED_BUILD" -eq 1 ]; then
     done
   done
 
-  echo "Cache rebuilt ($COUNT entries)"
+  echo
+  echo "Selesai build cache"
+  echo "Total proxy: $COUNT"
   echo
 else
-  echo "Cache valid (VPS list sama) — rebuild dilewati"
+  echo "Cache valid (daftar VPS tidak berubah)"
+  echo "Rebuild dilewati"
   echo
 fi
 
