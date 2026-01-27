@@ -1,5 +1,5 @@
 #!/bin/bash
-# DESC: Proxy cache checker (VPS-name based, fast & informative)
+# DESC: Proxy cache checker (VPS-name based, fast, with progress)
 
 CACHE_FILE="/home/ubuntu/cache/lxd-proxy-index.tsv"
 CACHE_DIR="$(dirname "$CACHE_FILE")"
@@ -37,11 +37,6 @@ fi
 if [ "$NEED_BUILD" -eq 1 ]; then
   echo "=== BUILD PROXY CACHE ==="
   echo "Waktu : $NOW"
-  echo "VPS yang terdeteksi:"
-  for vps in "${VPS_ARRAY[@]}"; do
-    echo "  - $vps"
-  done
-  echo "Memproses proxy..."
   echo
 
   mkdir -p "$CACHE_DIR"
@@ -55,7 +50,13 @@ if [ "$NEED_BUILD" -eq 1 ]; then
   } > "$CACHE_FILE"
 
   COUNT=0
+  TOTAL=${#VPS_ARRAY[@]}
+  IDX=1
+
   for VPS in "${VPS_ARRAY[@]}"; do
+    echo "→ ($IDX/$TOTAL) Build cache: $VPS"
+    IDX=$((IDX+1))
+
     lxc config device list "$VPS" | while read dev; do
       type=$(lxc config device get "$VPS" "$dev" type 2>/dev/null)
       [ "$type" != "proxy" ] && continue
