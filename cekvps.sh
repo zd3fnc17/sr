@@ -145,13 +145,14 @@ case "$MODE" in
     '
     ;;
 
-  -p)
-    awk -F'\t' '
-      $2 ~ /^[0-9]+$/ {
-        print $5 "-" "'"$HOST_IP"':" $2
-      }
-    ' "$CACHE_FILE"
-    ;;
+-p)
+  awk -F'\t' '
+    $2 ~ /^[0-9]+$/ {
+      print $5 "-" "'"$HOST_IP"':" $2
+    }
+  ' "$CACHE_FILE"
+  ;;
+
 
   *)
     awk -F'\t' -v vps="$MODE" '
