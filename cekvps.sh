@@ -14,16 +14,16 @@ show_help() {
 Cek VPS Proxy (berbasis cache)
 
 Usage:
-  ./cekvps.sh --all
+  ./cekvps.sh -all
       Tampilkan semua VPS + IP:PORT + STATUS + PROXY
 
-  ./cekvps.sh --p
+  ./cekvps.sh -p
       Output ringkas: namavps-ip:port
 
   ./cekvps.sh <nama-vps>
       Tampilkan IP:PORT untuk VPS tertentu
 
-  ./cekvps.sh -h | --help
+  ./cekvps.sh -h
       Tampilkan bantuan
 
 Catatan:
@@ -43,7 +43,7 @@ MODE="$1"
 [ -z "$MODE" ] && show_help
 
 case "$MODE" in
-  -h|--help)
+  -h)
     show_help
     ;;
 esac
@@ -124,7 +124,7 @@ fi
 # OUTPUT MODE
 ########################################
 case "$MODE" in
-  --all)
+  -all)
     printf "%-15s %-22s %-10s %s\n" "VPS_NAME" "IP:PORT" "STATUS" "PROXY"
     echo "---------------------------------------------------------------"
 
@@ -145,7 +145,7 @@ case "$MODE" in
     '
     ;;
 
-  --p)
+  -p)
     awk -F'\t' '
       $2 ~ /^[0-9]+$/ {
         print $5 "-" "'"$HOST_IP"':" $2
