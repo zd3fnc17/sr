@@ -43,11 +43,11 @@ echo "Output for Portal:"
 echo "hostnameip=$hostnameip"
 echo "servername=$servername"
 echo "cpucore=$cpucore"
-echo "storage=$storage"
+echo "storagegb=$storage"
 echo "portssh=$portssh"
 echo "portlxd=$portlxd"
 echo "username=$username"
-echo "memorytotal=$memorytotal"
+echo "memorytotalgb=$memorytotal"
 echo "cpuname=$cpuname"
 echo
 
