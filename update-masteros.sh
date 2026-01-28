@@ -1,7 +1,7 @@
 #!/bin/bash
 
-OS_VERSION="zzz-digios7"
-CHECK_VPS="zzz-digios7-data1"
+OS_VERSION="zzz-digios8"
+CHECK_VPS="zzz-digios8-data1"
 
 ARCHIVE_URL="https://srv.sgp1.cdn.digitaloceanspaces.com/masterlxd/${OS_VERSION}.tar.gz"
 STORAGE_POOLS=("data1" "data2" "data3" "data4")
