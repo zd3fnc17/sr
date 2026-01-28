@@ -2,7 +2,7 @@
 set -e
 
 # ===== GLOBAL DEFAULT CONFIG =====
-TEMPLATE="zzz-digios7-data1"
+TEMPLATE="zzz-digios8-data1"
 POOL="data1"
 CONNECT_PORT=6112
 
