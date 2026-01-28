@@ -40,7 +40,6 @@ storage=$(lsblk -bd -e 7 -o SIZE | awk '{sum+=$1} END {printf "%.0f", sum/1024/1
 # Output utama
 # ======================
 echo "Output for Portal:"
-echo
 echo "hostnameip=$hostnameip"
 echo "servername=$servername"
 echo "cpucore=$cpucore"
@@ -57,7 +56,6 @@ echo
 # ======================
 AUTH_KEYS="$HOME/.ssh/authorized_keys"
 echo "Authorized SSH Public Keys (comments):"
-echo
 if [[ -f "$AUTH_KEYS" ]]; then
     awk '
     /^[[:space:]]*#/ {next}
