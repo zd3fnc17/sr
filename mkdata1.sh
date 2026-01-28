@@ -33,32 +33,32 @@ echo "▶️ Membuat \"$VPS\" | Paket: $PAKET | Storage: $POOL"
 # ===== KONFIGURASI PAKET =====
 case "$PAKET" in
   standard)
-    CPU=2          # dulu 1 core
-    CPU_ALLOW=50%
+    # CPU=2          # non-aktif, limit core dimatikan
+    CPU_ALLOW=100%
     RAM=2001MB
     DISK=30GB
     ;;
   prime)
-    CPU=2          # dulu 1 core
-    CPU_ALLOW=50%
+    # CPU=2
+    CPU_ALLOW=100%
     RAM=4002MB
     DISK=50GB
     ;;
   elite)
-    CPU=4          # dulu 2 core
-    CPU_ALLOW=50%
+    # CPU=4
+    CPU_ALLOW=200%
     RAM=6003MB
     DISK=60GB
     ;;
   supreme)
-    CPU=4          # dulu 2 core
-    CPU_ALLOW=50%
+    # CPU=4
+    CPU_ALLOW=200%
     RAM=8004MB
     DISK=70GB
     ;;
   royal)
-    CPU=6          # dulu 3 core
-    CPU_ALLOW=50%
+    # CPU=6
+    CPU_ALLOW=300%
     RAM=10005MB
     DISK=80GB
     ;;
@@ -73,7 +73,6 @@ if ! lxc list "$TEMPLATE" --format csv -c n | grep -qx "$TEMPLATE"; then
   echo "❌ GAGAL: Template Master OS tidak ditemukan, silakan lihat panduan untuk menambahkan"
   exit 1
 fi
-
 
 # ===== VALIDASI NAMA VPS (PORT DARI 4 DIGIT TERAKHIR) =====
 NUMBERS=$(echo "$VPS" | grep -o '[0-9]*$')
@@ -104,8 +103,13 @@ fi
 # ===== PROVISIONING =====
 lxc copy "$TEMPLATE" "$VPS" --storage "$POOL"
 
-lxc config set "$VPS" limits.cpu "$CPU"
+# === CPU LIMIT DIMATIKAN (gunakan setting dari master OS) ===
+# lxc config set "$VPS" limits.cpu "$CPU"
+
+# === CPU dibatasi via allowance saja ===
 lxc config set "$VPS" limits.cpu.allowance "$CPU_ALLOW"
+
+# === MEMORY & DISK ===
 lxc config set "$VPS" limits.memory "$RAM"
 lxc config device set "$VPS" root size="$DISK"
 
@@ -123,7 +127,6 @@ echo "🎉 VPS BERHASIL DIBUAT!"
 echo "VPS       : $VPS"
 echo "PAKET     : $PAKET"
 echo "TEMPLATE  : $TEMPLATE"
-# echo "CPU       : $CPU core (50%)"
 echo "RAM       : $RAM"
 echo "DISK      : $DISK"
 echo "STORAGE   : $POOL"
