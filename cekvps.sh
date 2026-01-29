@@ -1,7 +1,7 @@
 #!/bin/bash
-# DESC: Smart VPS proxy checker (incremental cache)
+# DESC: Smart VPS proxy checker (incremental cache, first-build safe)
 
-CACHE_FILE="~/cache/lxd-proxy-index.tsv"
+CACHE_FILE="/home/ubuntu/cache/lxd-proxy-index.tsv"
 CACHE_DIR="$(dirname "$CACHE_FILE")"
 HOST_IP=$(hostname -I | awk '{print $1}')
 NOW="$(date '+%Y-%m-%d %H:%M:%S')"
@@ -47,20 +47,22 @@ LIVE_VPS_LIST=$(printf "%s," "${VPS_ARRAY[@]}" | sed 's/,$//')
 ########################################
 mkdir -p "$CACHE_DIR"
 
+FIRST_BUILD=0
 if [ ! -f "$CACHE_FILE" ]; then
+  FIRST_BUILD=1
   echo "Cache belum ada → build awal"
-  {
-    echo "# UPDATED_AT=$NOW"
-    echo "# VPS_LIST=$LIVE_VPS_LIST"
-    echo -e "LISTEN_IP\tLISTEN_PORT\tCONNECT_IP\tCONNECT_PORT\tVPS_NAME\tPROXY_NAME"
-  } > "$CACHE_FILE"
+  : > "$CACHE_FILE"
 fi
 
 ########################################
 # READ CACHE VPS LIST
 ########################################
-CACHE_VPS_LIST=$(grep '^# VPS_LIST=' "$CACHE_FILE" | cut -d= -f2)
-IFS=',' read -ra CACHE_VPS_ARRAY <<< "$CACHE_VPS_LIST"
+CACHE_VPS_ARRAY=()
+
+if [ "$FIRST_BUILD" -eq 0 ]; then
+  CACHE_VPS_LIST=$(grep '^# VPS_LIST=' "$CACHE_FILE" | cut -d= -f2)
+  IFS=',' read -ra CACHE_VPS_ARRAY <<< "$CACHE_VPS_LIST"
+fi
 
 ########################################
 # DIFF VPS
@@ -81,7 +83,7 @@ done
 ########################################
 for v in "${VPS_REMOVED[@]}"; do
   echo "✖ VPS dihapus → $v (hapus cache)"
-  awk -F'\t' -v vps="$v" 'NR<=3 || $5!=vps' \
+  awk -F'\t' 'NR<=3 || $5!="'$v'"' \
     "$CACHE_FILE" > "$CACHE_FILE.tmp" && mv "$CACHE_FILE.tmp" "$CACHE_FILE"
 done
 
@@ -89,7 +91,7 @@ done
 # ADD NEW VPS TO CACHE
 ########################################
 for VPS in "${VPS_ADDED[@]}"; do
-  echo "➕ VPS baru → build cache: $VPS"
+  echo "➕ Build cache VPS: $VPS"
 
   lxc config device list "$VPS" | while read dev; do
     type=$(lxc config device get "$VPS" "$dev" type 2>/dev/null)
@@ -107,12 +109,18 @@ for VPS in "${VPS_ADDED[@]}"; do
 done
 
 ########################################
-# UPDATE HEADER
+# REWRITE HEADER (ALWAYS LAST)
 ########################################
-sed -i \
-  -e "s|^# VPS_LIST=.*|# VPS_LIST=$LIVE_VPS_LIST|" \
-  -e "s|^# UPDATED_AT=.*|# UPDATED_AT=$NOW|" \
-  "$CACHE_FILE"
+TMP="$CACHE_FILE.tmp"
+
+{
+  echo "# UPDATED_AT=$NOW"
+  echo "# VPS_LIST=$LIVE_VPS_LIST"
+  echo -e "LISTEN_IP\tLISTEN_PORT\tCONNECT_IP\tCONNECT_PORT\tVPS_NAME\tPROXY_NAME"
+  grep -v '^#' "$CACHE_FILE"
+} > "$TMP"
+
+mv "$TMP" "$CACHE_FILE"
 
 ########################################
 # OUTPUT MODE
