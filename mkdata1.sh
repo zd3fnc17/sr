@@ -33,31 +33,31 @@ echo "▶️ Membuat \"$VPS\" | Paket: $PAKET | Storage: $POOL"
 # ===== KONFIGURASI PAKET =====
 case "$PAKET" in
   standard)
-    # CPU=2          # non-aktif, limit core dimatikan
+    CPU=1          # kasih pagar jika ingin menonaktifkan konfigurasi
     CPU_ALLOW=100%
     RAM=2001MB
     DISK=30GB
     ;;
   prime)
-    # CPU=2
+    # CPU=1
     CPU_ALLOW=100%
     RAM=4002MB
     DISK=50GB
     ;;
   elite)
-    # CPU=4
+    CPU=2
     CPU_ALLOW=200%
     RAM=6003MB
     DISK=60GB
     ;;
   supreme)
-    # CPU=4
+    CPU=2
     CPU_ALLOW=200%
     RAM=8004MB
     DISK=70GB
     ;;
   royal)
-    # CPU=6
+    CPU=3
     CPU_ALLOW=300%
     RAM=10005MB
     DISK=80GB
