@@ -109,7 +109,7 @@ for VPS in "${VPS_ADDED[@]}"; do
 done
 
 ########################################
-# REWRITE HEADER (ALWAYS LAST)
+# REWRITE HEADER (FIXED)
 ########################################
 TMP="$CACHE_FILE.tmp"
 
@@ -117,7 +117,7 @@ TMP="$CACHE_FILE.tmp"
   echo "# UPDATED_AT=$NOW"
   echo "# VPS_LIST=$LIVE_VPS_LIST"
   echo -e "LISTEN_IP\tLISTEN_PORT\tCONNECT_IP\tCONNECT_PORT\tVPS_NAME\tPROXY_NAME"
-  grep -v '^#' "$CACHE_FILE"
+  awk 'NR>3' "$CACHE_FILE"
 } > "$TMP"
 
 mv "$TMP" "$CACHE_FILE"
