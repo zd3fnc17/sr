@@ -11,18 +11,18 @@ echo "Tindakan ini akan MENGHAPUS vps berikut:"
 echo "👉 $*"
 echo
 
-read -p "Lanjutkan? (y/n): " confirm
-case "$confirm" in
-  y|Y)
-    echo
-    echo "🚀 Proses dimulai..."
-    echo "============================="
-    ;;
-  *)
-    echo "❌ Dibatalkan oleh user"
-    exit 0
-    ;;
-esac
+# read -p "Lanjutkan? (y/n): " confirm
+# case "$confirm" in
+#   y|Y)
+#     echo
+#     echo "🚀 Proses dimulai..."
+#     echo "============================="
+#     ;;
+#   *)
+#     echo "❌ Dibatalkan oleh user"
+#     exit 0
+#     ;;
+# esac
 
 for v in "$@"; do
   if ! lxc info "$v" >/dev/null 2>&1; then
