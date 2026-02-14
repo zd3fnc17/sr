@@ -39,7 +39,7 @@ case "$PAKET" in
     DISK=30GB
     ;;
   prime)
-    # CPU=1
+    CPU=1
     CPU_ALLOW=100%
     RAM=4002MB
     DISK=50GB
