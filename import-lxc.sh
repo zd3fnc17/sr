@@ -46,8 +46,13 @@ do
     # Ambil port forwarding bernama "vnc"
     VNC_PORT=$(lxc config device show "$VPS_NAME" | awk '
         /vnc:/ {flag=1}
-        flag && /listen:/ {print $2; flag=0}
-    ' | cut -d':' -f2)
+        flag && /listen:/ {
+            split($2,a,":");
+            print a[length(a)];
+            flag=0
+        }
+    ')
+
 
     echo ""
     echo "VPS telah berhasil di import:"
