@@ -1,5 +1,5 @@
 #!/bin/bash
-# DESC: Smart VPS proxy checker (cache + dual output mode)
+# DESC: Smart VPS proxy checker (cache + dual output + force rebuild)
 
 CACHE_FILE="/home/ubuntu/cache/lxd-proxy-index.tsv"
 CACHE_DIR="$(dirname "$CACHE_FILE")"
@@ -15,9 +15,49 @@ Cek VPS Proxy (berbasis cache)
 
 Usage:
   ./cekvps.sh -all
+      Tampilkan semua VPS (ACTIVE + STOP + ACTIVE ONLY)
+
   ./cekvps.sh -p
+      Output ringkas: namavps=ip:port
+
   ./cekvps.sh <nama-vps>
+      Tampilkan IP:PORT untuk VPS tertentu
+
+  ./cekvps.sh --force
+      Paksa rebuild cache (abaikan cache lama)
+
   ./cekvps.sh -h
+      Tampilkan bantuan
+
+
+=== CARA KERJA ===
+
+1. Script membaca daftar VPS dari LXC
+2. Membandingkan dengan cache sebelumnya
+3. Cache hanya akan di-rebuild jika:
+   - file cache belum ada
+   - ada perubahan jumlah / nama VPS
+   - menggunakan --force
+
+4. Jika tidak ada perubahan:
+   → cache digunakan langsung (lebih cepat)
+
+5. Saat mode -all atau -p:
+   - port akan dicek (OPEN / CLOSED)
+   - hasil ditampilkan dalam 2 bagian:
+     a. ACTIVE AND STOP
+     b. ACTIVE ONLY
+
+6. Mode <nama-vps>:
+   - tidak cek status port
+   - hanya menampilkan mapping IP:PORT dari cache
+
+
+=== CATATAN ===
+
+- Perubahan proxy di dalam VPS TIDAK terdeteksi otomatis
+- Gunakan --force jika ada perubahan proxy
+
 EOF
   exit 0
 }
@@ -26,8 +66,18 @@ EOF
 # ARGUMENT
 ########################################
 MODE="$1"
+FORCE=0
+
 [ -z "$MODE" ] && show_help
-[ "$MODE" = "-h" ] && show_help
+
+if [ "$MODE" = "-h" ]; then
+  show_help
+fi
+
+if [ "$MODE" = "--force" ]; then
+  FORCE=1
+  MODE="-all"
+fi
 
 ########################################
 # GET VPS LIST
@@ -48,7 +98,9 @@ fi
 ########################################
 NEED_BUILD=0
 
-if [ ! -f "$CACHE_FILE" ]; then
+if [ "$FORCE" -eq 1 ]; then
+  NEED_BUILD=1
+elif [ ! -f "$CACHE_FILE" ]; then
   NEED_BUILD=1
 elif [ "$LIVE_VPS_LIST" != "$CACHE_VPS_LIST" ]; then
   NEED_BUILD=1
@@ -58,6 +110,11 @@ fi
 # BUILD CACHE
 ########################################
 if [ "$NEED_BUILD" -eq 1 ]; then
+
+  if [ "$FORCE" -eq 1 ]; then
+    echo "⚡ Force rebuild cache"
+  fi
+
   echo "=== BUILD PROXY CACHE ==="
   echo "Waktu : $NOW"
   echo
