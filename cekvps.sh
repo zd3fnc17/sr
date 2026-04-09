@@ -17,15 +17,14 @@ Usage:
   ./cekvps.sh -all
       Tampilkan semua VPS + IP:PORT + STATUS + PROXY (incremental)
 
+  ./cekvps.sh -force
+      Rebuild total cache (dengan progress, tanpa output list)
+
   ./cekvps.sh -p
       Output ringkas: namavps=ip:port
 
   ./cekvps.sh <nama-vps>
       Tampilkan IP:PORT untuk VPS tertentu
-
-
-  ./cekvps.sh -force
-      Fitur ini otomatis memperbarui cache perubahan saja, namun terkadang ada ketidaksesuaian. jalankan ini untuk untuk Rebuild cache
 
   ./cekvps.sh -h
       Tampilkan bantuan
@@ -113,7 +112,7 @@ done
 # ADD NEW VPS TO CACHE
 ########################################
 for VPS in "${VPS_ADDED[@]}"; do
-  [ "$FORCE" -eq 0 ] && echo "➕ Build cache VPS: $VPS"
+  echo "➕ Build cache VPS: $VPS"
 
   lxc config device list "$VPS" | while read dev; do
     type=$(lxc config device get "$VPS" "$dev" type 2>/dev/null)
@@ -148,6 +147,7 @@ mv "$TMP" "$CACHE_FILE"
 # FORCE MODE OUTPUT (NO LIST)
 ########################################
 if [ "$FORCE" -eq 1 ]; then
+  echo ""
   echo "✅ Cache berhasil direbuild ($NOW)"
   exit 0
 fi
