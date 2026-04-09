@@ -1,5 +1,5 @@
 #!/bin/bash
-# DESC: Smart VPS proxy checker (incremental cache + force rebuild)
+# DESC: Smart VPS proxy checker (cache + dual output mode)
 
 CACHE_FILE="/home/ubuntu/cache/lxd-proxy-index.tsv"
 CACHE_DIR="$(dirname "$CACHE_FILE")"
@@ -11,23 +11,13 @@ NOW="$(date '+%Y-%m-%d %H:%M:%S')"
 ########################################
 show_help() {
   cat <<EOF
-Cek VPS Proxy (incremental cache + force rebuild)
+Cek VPS Proxy (berbasis cache)
 
 Usage:
   ./cekvps.sh -all
-      Tampilkan semua VPS + IP:PORT + STATUS + PROXY (incremental)
-
-  ./cekvps.sh -force
-      Rebuild total cache (dengan progress, tanpa output list)
-
   ./cekvps.sh -p
-      Output ringkas: namavps=ip:port
-
   ./cekvps.sh <nama-vps>
-      Tampilkan IP:PORT untuk VPS tertentu
-
   ./cekvps.sh -h
-      Tampilkan bantuan
 EOF
   exit 0
 }
@@ -39,147 +29,165 @@ MODE="$1"
 [ -z "$MODE" ] && show_help
 [ "$MODE" = "-h" ] && show_help
 
-FORCE=0
-if [ "$MODE" = "-force" ]; then
-  FORCE=1
-  MODE="-all"
-fi
-
 ########################################
-# LIVE VPS LIST
+# GET VPS LIST
 ########################################
 mapfile -t VPS_ARRAY < <(lxc list --format csv -c n | sort)
 LIVE_VPS_LIST=$(printf "%s," "${VPS_ARRAY[@]}" | sed 's/,$//')
 
 ########################################
-# CACHE INIT
+# READ CACHE
 ########################################
-mkdir -p "$CACHE_DIR"
-
-FIRST_BUILD=0
-
-if [ "$FORCE" -eq 1 ]; then
-  echo "⚡ Force rebuild cache"
-  FIRST_BUILD=1
-  : > "$CACHE_FILE"
-elif [ ! -f "$CACHE_FILE" ]; then
-  FIRST_BUILD=1
-  echo "Cache belum ada → build awal"
-  : > "$CACHE_FILE"
-fi
-
-########################################
-# READ CACHE VPS LIST
-########################################
-CACHE_VPS_ARRAY=()
-
-if [ "$FIRST_BUILD" -eq 0 ]; then
+CACHE_VPS_LIST=""
+if [ -f "$CACHE_FILE" ]; then
   CACHE_VPS_LIST=$(grep '^# VPS_LIST=' "$CACHE_FILE" | cut -d= -f2)
-  IFS=',' read -ra CACHE_VPS_ARRAY <<< "$CACHE_VPS_LIST"
 fi
 
 ########################################
-# FORCE MODE → anggap semua VPS baru
+# DECIDE REBUILD
 ########################################
-if [ "$FORCE" -eq 1 ]; then
-  CACHE_VPS_ARRAY=()
+NEED_BUILD=0
+
+if [ ! -f "$CACHE_FILE" ]; then
+  NEED_BUILD=1
+elif [ "$LIVE_VPS_LIST" != "$CACHE_VPS_LIST" ]; then
+  NEED_BUILD=1
 fi
 
 ########################################
-# DIFF VPS
+# BUILD CACHE
 ########################################
-VPS_ADDED=()
-VPS_REMOVED=()
+if [ "$NEED_BUILD" -eq 1 ]; then
+  echo "=== BUILD PROXY CACHE ==="
+  echo "Waktu : $NOW"
+  echo
 
-for v in "${VPS_ARRAY[@]}"; do
-  [[ ! " ${CACHE_VPS_ARRAY[*]} " =~ " $v " ]] && VPS_ADDED+=("$v")
-done
+  mkdir -p "$CACHE_DIR"
 
-for v in "${CACHE_VPS_ARRAY[@]}"; do
-  [[ ! " ${VPS_ARRAY[*]} " =~ " $v " ]] && VPS_REMOVED+=("$v")
-done
+  {
+    echo "# UPDATED_AT=$NOW"
+    echo "# VPS_LIST=$LIVE_VPS_LIST"
+    echo -e "LISTEN_IP\tLISTEN_PORT\tCONNECT_IP\tCONNECT_PORT\tVPS_NAME\tPROXY_NAME"
+  } > "$CACHE_FILE"
 
-########################################
-# REMOVE DELETED VPS FROM CACHE
-########################################
-for v in "${VPS_REMOVED[@]}"; do
-  echo "✖ VPS dihapus → $v (hapus cache)"
-  awk -F'\t' 'NR<=3 || $5!="'$v'"' \
-    "$CACHE_FILE" > "$CACHE_FILE.tmp" && mv "$CACHE_FILE.tmp" "$CACHE_FILE"
-done
+  TOTAL=${#VPS_ARRAY[@]}
+  IDX=1
 
-########################################
-# ADD NEW VPS TO CACHE
-########################################
-for VPS in "${VPS_ADDED[@]}"; do
-  echo "➕ Build cache VPS: $VPS"
+  for VPS in "${VPS_ARRAY[@]}"; do
+    echo "→ ($IDX/$TOTAL) Build cache: $VPS"
+    IDX=$((IDX+1))
 
-  lxc config device list "$VPS" | while read dev; do
-    type=$(lxc config device get "$VPS" "$dev" type 2>/dev/null)
-    [ "$type" != "proxy" ] && continue
+    lxc config device list "$VPS" | while read dev; do
+      type=$(lxc config device get "$VPS" "$dev" type 2>/dev/null)
+      [ "$type" != "proxy" ] && continue
 
-    listen=$(lxc config device get "$VPS" "$dev" listen)
-    connect=$(lxc config device get "$VPS" "$dev" connect)
-    [ -z "$listen" ] || [ -z "$connect" ] && continue
+      listen=$(lxc config device get "$VPS" "$dev" listen)
+      connect=$(lxc config device get "$VPS" "$dev" connect)
+      [ -z "$listen" ] || [ -z "$connect" ] && continue
 
-    L_PORT="${listen##*:}"
-    C_PORT="${connect##*:}"
+      L_PORT="${listen##*:}"
+      C_PORT="${connect##*:}"
 
-    echo -e "0.0.0.0\t$L_PORT\t127.0.0.1\t$C_PORT\t$VPS\t$dev" >> "$CACHE_FILE"
+      echo -e "0.0.0.0\t$L_PORT\t127.0.0.1\t$C_PORT\t$VPS\t$dev" >> "$CACHE_FILE"
+    done
   done
-done
 
-########################################
-# REWRITE HEADER
-########################################
-TMP="$CACHE_FILE.tmp"
-
-{
-  echo "# UPDATED_AT=$NOW"
-  echo "# VPS_LIST=$LIVE_VPS_LIST"
-  echo -e "LISTEN_IP\tLISTEN_PORT\tCONNECT_IP\tCONNECT_PORT\tVPS_NAME\tPROXY_NAME"
-  awk 'NR>3' "$CACHE_FILE"
-} > "$TMP"
-
-mv "$TMP" "$CACHE_FILE"
-
-########################################
-# FORCE MODE OUTPUT (NO LIST)
-########################################
-if [ "$FORCE" -eq 1 ]; then
-  echo ""
-  echo "✅ Cache berhasil direbuild ($NOW)"
-  exit 0
+  echo
+  echo "Selesai build cache"
+  echo
+else
+  echo "Cache valid (daftar VPS tidak berubah)"
+  echo "Rebuild dilewati"
+  echo
 fi
 
 ########################################
-# OUTPUT MODE
+# OUTPUT
 ########################################
 case "$MODE" in
-  -all)
-    printf "%-15s %-22s %-10s %s\n" "VPS_NAME" "IP:PORT" "STATUS" "PROXY"
-    echo "---------------------------------------------------------------"
 
+########################################
+# MODE -all
+########################################
+-all)
+
+  RESULT=$(
     awk -F'\t' '$2~/^[0-9]+$/{print $5 "|" $2 "|" $6}' "$CACHE_FILE" | \
     xargs -P 20 -n 1 bash -c '
       IFS="|" read VPS PORT PROXY <<< "$0"
-      if timeout 1 bash -c "</dev/tcp/127.0.0.1/$PORT" &>/dev/null; then
+
+      if timeout 1 bash -c "</dev/tcp/127.0.0.1/$PORT" >/dev/null 2>&1; then
         STATUS="OPEN"
       else
         STATUS="CLOSED"
       fi
-      printf "%-15s %-22s %-10s %s\n" \
+
+      printf "%s|%s|%s|%s\n" \
         "$VPS" "'"$HOST_IP"':$PORT" "$STATUS" "$PROXY"
     '
-    ;;
+  )
 
-  -p)
-    awk -F'\t' '$2~/^[0-9]+$/{print $5 "=" "'"$HOST_IP"':" $2}' "$CACHE_FILE"
-    ;;
+  echo "=== ACTIVE AND STOP ==="
+  printf "%-15s %-22s %-10s %s\n" "VPS_NAME" "IP:PORT" "STATUS" "PROXY"
+  echo "---------------------------------------------------------------"
 
-  *)
-    awk -F'\t' -v vps="$MODE" '$5==vps && $2~/^[0-9]+${
-      print vps "\t" "'"$HOST_IP"':" $2
-    }' "$CACHE_FILE"
-    ;;
+  echo "$RESULT" | while IFS="|" read VPS IP STATUS PROXY; do
+    printf "%-15s %-22s %-10s %s\n" "$VPS" "$IP" "$STATUS" "$PROXY"
+  done
+
+  echo
+
+  echo "=== ACTIVE ONLY ==="
+  printf "%-15s %-22s %-10s %s\n" "VPS_NAME" "IP:PORT" "STATUS" "PROXY"
+  echo "---------------------------------------------------------------"
+
+  echo "$RESULT" | while IFS="|" read VPS IP STATUS PROXY; do
+    [ "$STATUS" != "OPEN" ] && continue
+    printf "%-15s %-22s %-10s %s\n" "$VPS" "$IP" "$STATUS" "$PROXY"
+  done
+  ;;
+
+########################################
+# MODE -p
+########################################
+-p)
+
+  RESULT=$(
+    awk -F'\t' '$2~/^[0-9]+$/{print $5 "|" $2}' "$CACHE_FILE" | \
+    xargs -P 20 -n 1 bash -c '
+      IFS="|" read VPS PORT <<< "$0"
+
+      if timeout 1 bash -c "</dev/tcp/127.0.0.1/$PORT" >/dev/null 2>&1; then
+        STATUS="OPEN"
+      else
+        STATUS="CLOSED"
+      fi
+
+      printf "%s|%s|%s\n" \
+        "$VPS" "'"$HOST_IP"':$PORT" "$STATUS"
+    '
+  )
+
+  echo "=== ACTIVE AND STOP ==="
+  echo "$RESULT" | while IFS="|" read VPS IP STATUS; do
+    echo "$VPS=$IP"
+  done
+
+  echo
+
+  echo "=== ACTIVE ONLY ==="
+  echo "$RESULT" | while IFS="|" read VPS IP STATUS; do
+    [ "$STATUS" != "OPEN" ] && continue
+    echo "$VPS=$IP"
+  done
+  ;;
+
+########################################
+# MODE specific VPS
+########################################
+*)
+  awk -F'\t' -v vps="$MODE" '$5==vps && $2~/^[0-9]+${
+    print vps "\t" "'"$HOST_IP"':" $2
+  }' "$CACHE_FILE"
+  ;;
 esac
