@@ -1,5 +1,5 @@
 #!/bin/bash
-# DESC: Smart VPS proxy checker (incremental cache, first-build safe)
+# DESC: Smart VPS proxy checker (incremental cache + force rebuild)
 
 CACHE_FILE="/home/ubuntu/cache/lxd-proxy-index.tsv"
 CACHE_DIR="$(dirname "$CACHE_FILE")"
@@ -11,11 +11,14 @@ NOW="$(date '+%Y-%m-%d %H:%M:%S')"
 ########################################
 show_help() {
   cat <<EOF
-Cek VPS Proxy (incremental cache)
+Cek VPS Proxy (incremental cache + force rebuild)
 
 Usage:
   ./cekvps.sh -all
-      Tampilkan semua VPS + IP:PORT + STATUS + PROXY
+      Tampilkan semua VPS + IP:PORT + STATUS + PROXY (incremental)
+
+  ./cekvps.sh -force
+      Rebuild total cache lalu tampilkan semua VPS
 
   ./cekvps.sh -p
       Output ringkas: namavps=ip:port
@@ -36,6 +39,12 @@ MODE="$1"
 [ -z "$MODE" ] && show_help
 [ "$MODE" = "-h" ] && show_help
 
+FORCE=0
+if [ "$MODE" = "-force" ]; then
+  FORCE=1
+  MODE="-all"
+fi
+
 ########################################
 # LIVE VPS LIST
 ########################################
@@ -48,7 +57,12 @@ LIVE_VPS_LIST=$(printf "%s," "${VPS_ARRAY[@]}" | sed 's/,$//')
 mkdir -p "$CACHE_DIR"
 
 FIRST_BUILD=0
-if [ ! -f "$CACHE_FILE" ]; then
+
+if [ "$FORCE" -eq 1 ]; then
+  echo "⚡ Force rebuild cache"
+  FIRST_BUILD=1
+  : > "$CACHE_FILE"
+elif [ ! -f "$CACHE_FILE" ]; then
   FIRST_BUILD=1
   echo "Cache belum ada → build awal"
   : > "$CACHE_FILE"
@@ -62,6 +76,13 @@ CACHE_VPS_ARRAY=()
 if [ "$FIRST_BUILD" -eq 0 ]; then
   CACHE_VPS_LIST=$(grep '^# VPS_LIST=' "$CACHE_FILE" | cut -d= -f2)
   IFS=',' read -ra CACHE_VPS_ARRAY <<< "$CACHE_VPS_LIST"
+fi
+
+########################################
+# FORCE MODE → anggap semua VPS baru
+########################################
+if [ "$FORCE" -eq 1 ]; then
+  CACHE_VPS_ARRAY=()
 fi
 
 ########################################
@@ -109,7 +130,7 @@ for VPS in "${VPS_ADDED[@]}"; do
 done
 
 ########################################
-# REWRITE HEADER (FIXED)
+# REWRITE HEADER
 ########################################
 TMP="$CACHE_FILE.tmp"
 
