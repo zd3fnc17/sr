@@ -243,7 +243,7 @@ case "$MODE" in
 # MODE specific VPS
 ########################################
 *)
-  awk -F'\t' -v vps="$MODE" '$5==vps && $2~/^[0-9]+${
+  awk -F'\t' -v vps="$MODE" '$5==vps && $2~/^[0-9]+$/ {
     print vps "\t" "'"$HOST_IP"':" $2
   }' "$CACHE_FILE"
   ;;
