@@ -1,19 +1,40 @@
 #!/bin/bash
 
 # ==============================
-# mkedit.sh - LXC Resource Editor
+# mkedit.sh - LXD Resource Editor
 # ==============================
 
-# Minimal argumen: paket + minimal 1 CTID
-if [ $# -lt 2 ]; then
+show_help() {
+  echo ""
+  echo "LXD Resource Editor (mkedit.sh)"
   echo ""
   echo "Usage:"
-  echo "  $0 <paket> CTID1 [CTID2 ...]"
+  echo "  ~/sr/mkedit.sh <paket> CONTAINER1 [CONTAINER2 ...]"
   echo ""
   echo "Contoh:"
-  echo "  $0 royal 101 102"
+  echo "  ~/sr/mkedit.sh royal web1 web2"
   echo ""
-  exit 1
+  echo "Paket tersedia:"
+  echo "  standard  - 1 CPU, 2001MB RAM, 30GB Disk"
+  echo "  prime     - 1 CPU, 4002MB RAM, 50GB Disk"
+  echo "  elite     - 2 CPU, 6003MB RAM, 60GB Disk"
+  echo "  supreme   - 2 CPU, 8004MB RAM, 70GB Disk"
+  echo "  royal     - 3 CPU, 10005MB RAM, 80GB Disk"
+  echo ""
+  exit 0
+}
+
+# ==============================
+# Handle help flag
+# ==============================
+
+if [[ "$1" == "-h" || "$1" == "--help" ]]; then
+  show_help
+fi
+
+# Minimal argumen
+if [ $# -lt 2 ]; then
+  show_help
 fi
 
 PLAN=$1
@@ -25,77 +46,62 @@ shift
 
 case "$PLAN" in
 
-  # ---------- STANDARD ----------
   standard)
     CPU=1
-    CPU_ALLOW=1
-    RAM=2001
-    DISK=30G
+    RAM=2001MB
+    DISK=30GB
     ;;
 
-  # ---------- PRIME ----------
   prime)
     CPU=1
-    CPU_ALLOW=1
-    RAM=4002
-    DISK=50G
+    RAM=4002MB
+    DISK=50GB
     ;;
 
-  # ---------- ELITE ----------
   elite)
     CPU=2
-    CPU_ALLOW=2
-    RAM=6003
-    DISK=60G
+    RAM=6003MB
+    DISK=60GB
     ;;
 
-  # ---------- SUPREME ----------
   supreme)
     CPU=2
-    CPU_ALLOW=2
-    RAM=8004
-    DISK=70G
+    RAM=8004MB
+    DISK=70GB
     ;;
 
-  # ---------- ROYAL ----------
   royal)
     CPU=3
-    CPU_ALLOW=3
-    RAM=10005
-    DISK=80G
+    RAM=10005MB
+    DISK=80GB
     ;;
-
-  # ---------- TAMBAHKAN PAKET BARU DI SINI ----------
-
 
   *)
     echo ""
     echo "Paket '$PLAN' tidak ditemukan."
-    echo "Silakan cek kembali nama paket."
+    echo "Gunakan -h untuk melihat daftar paket."
     echo ""
     exit 1
     ;;
-
 esac
 
-
 # ==============================
-# Eksekusi ke semua CT
+# Eksekusi ke semua container
 # ==============================
 
-for CTID in "$@"; do
+for CT in "$@"; do
   echo "====================================="
-  echo "Mengubah CT $CTID ke paket: $PLAN"
-  echo "CPU     : $CPU core"
-  echo "CPU LIM : $CPU_ALLOW"
-  echo "RAM     : ${RAM}MB"
-  echo "DISK    : $DISK"
+  echo "Mengubah container $CT ke paket: $PLAN"
+  echo "CPU  : $CPU core"
+  echo "RAM  : $RAM"
+  echo "DISK : $DISK"
   echo "====================================="
 
-  pct set $CTID -cores $CPU -cpulimit $CPU_ALLOW -memory $RAM
-  pct resize $CTID rootfs $DISK
+  lxc config set "$CT" limits.cpu "$CPU"
+  lxc config set "$CT" limits.memory "$RAM"
+  lxc config device set "$CT" root size "$DISK"
 
-  echo "Selesai untuk CT $CTID"
+  echo "Selesai untuk $CT"
   echo ""
 done
 
