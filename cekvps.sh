@@ -14,19 +14,19 @@ show_help() {
 Cek VPS Proxy (berbasis cache)
 
 Usage:
-  ./cekvps.sh -all
+  ~/sr/cekvps.sh -all
       Tampilkan semua VPS (ACTIVE + STOP + ACTIVE ONLY)
 
-  ./cekvps.sh -p
+  ~/sr/cekvps.sh -p
       Output ringkas: namavps=ip:port
 
-  ./cekvps.sh <nama-vps>
+  ~/sr/cekvps.sh <nama-vps>
       Tampilkan IP:PORT untuk VPS tertentu
 
-  ./cekvps.sh --force
+  ~/sr/cekvps.sh --force
       Paksa rebuild cache (abaikan cache lama)
 
-  ./cekvps.sh -h
+  ~/sr/cekvps.sh -h
       Tampilkan bantuan
 
 
