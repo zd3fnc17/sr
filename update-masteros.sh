@@ -1,21 +1,21 @@
 #!/bin/bash
 
-OS_VERSION="zzz-digios9"
-CHECK_VPS="zzz-digios9-data1"
+OS_VERSION="zzz-digios10"
+CHECK_VPS="zzz-digios10-data1"
 
 ARCHIVE_URL="https://srv.sgp1.cdn.digitaloceanspaces.com/masterlxd/${OS_VERSION}.tar.gz"
 STORAGE_POOLS=("data1" "data2" "data3" "data4")
 
 # ===== LIST MASTER OS LAMA YANG MAU DIBERSIHKAN =====
 CLEANUP_INSTANCES=(
-    "digios5-data1"
-    "digios5-data2"
     "digios6-data1"
     "digios6-data2"
     "digios7-data1"
     "digios7-data2"
     "digios8-data1"
     "digios8-data2"
+    "digios9-data1"
+    "digios9-data2"
 )
 
 WORKDIR="$HOME/masteros"
