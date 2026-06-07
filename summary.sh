@@ -77,7 +77,7 @@ done
 
 cat <<'EOF'
 - jangan membuat paket melebihi batas
-- script versi 9.1
-- digiOS 9. rilis pada 14 mei 2026. memperbaiki webview pada meta trader 5
+- script versi 10.0
+- digiOS 10. rilis 07 juni 2026. menambahkan MT Manager v2
 ----
 EOF
