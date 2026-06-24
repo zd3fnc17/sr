@@ -1,7 +1,7 @@
 #!/bin/bash
 
-OS_VERSION="zzz-digios10"
-CHECK_VPS="zzz-digios10-data1"
+OS_VERSION="zzz-digios11"
+CHECK_VPS="zzz-digios11-data1"
 
 ARCHIVE_URL="https://srv.sgp1.cdn.digitaloceanspaces.com/masterlxd/${OS_VERSION}.tar.gz"
 STORAGE_POOLS=("data1" "data2" "data3" "data4")
@@ -16,6 +16,8 @@ CLEANUP_INSTANCES=(
     "digios8-data2"
     "digios9-data1"
     "digios9-data2"
+    "digios10-data1"
+    "digios10-data2"
 )
 
 WORKDIR="$HOME/masteros"
