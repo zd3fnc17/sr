@@ -78,6 +78,5 @@ done
 cat <<'EOF'
 - jangan membuat paket melebihi batas
 - script versi 11.0
-- digiOS 10. rilis 07 juni 2026. menambahkan MT Manager v2
 ----
 EOF
