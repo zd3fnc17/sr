@@ -77,6 +77,6 @@ done
 
 cat <<'EOF'
 - jangan membuat paket melebihi batas
-- script versi 11.0
+- script versi 12.0
 ----
 EOF
