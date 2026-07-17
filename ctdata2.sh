@@ -42,25 +42,25 @@ case "$PAKET" in
     CPU=1
     CPU_ALLOW=100%
     RAM=4002MB
-    DISK=50GB
+    DISK=40GB
     ;;
   elite)
     CPU=2
     CPU_ALLOW=200%
     RAM=6003MB
-    DISK=60GB
+    DISK=50GB
     ;;
   supreme)
     CPU=2
     CPU_ALLOW=200%
     RAM=8004MB
-    DISK=70GB
+    DISK=60GB
     ;;
   royal)
     CPU=3
     CPU_ALLOW=300%
     RAM=10005MB
-    DISK=80GB
+    DISK=70GB
     ;;
   *)
     echo "❌ GAGAL: Paket \"$PAKET\" tidak dikenal"
