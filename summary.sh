@@ -2,12 +2,11 @@
 
 echo "=== INFORMASI VPS sedang RUNNING ==="
 printf "%-20s %s\n" "VPS" "RAM"
-
 total_mb=0
-
+running_count=0                       # <-- tambah ini
 while IFS=, read -r name status ram; do
   [[ "$status" != "RUNNING" ]] && continue
-
+  ((running_count++))                 # <-- tambah ini
   if [[ -z "$ram" ]]; then
     ram="UNLIMITED"
   else
@@ -19,11 +18,10 @@ while IFS=, read -r name status ram; do
       total_mb=$((total_mb + ${ram%MB}))
     fi
   fi
-
   printf "%-20s %s\n" "$name" "$ram"
 done < <(lxc list -c n,s,limits.memory --format csv)
-
 echo "--------------------------------------"
+printf "%-20s %d\n" "TOTAL VPS RUNNING:" "$running_count"
 printf "%-20s %d MB (%.2f GB)\n" \
   "RAM DIGUNAKAN:" "$total_mb" "$(echo "$total_mb/1024" | bc -l)"
 
