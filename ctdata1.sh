@@ -35,31 +35,31 @@ case "$PAKET" in
   standard)
     CPU=1          # kasih pagar jika ingin menonaktifkan konfigurasi
     CPU_ALLOW=100%
-    RAM=1500MB
+    RAM=1024MB
     DISK=30GB
     ;;
   prime)
     CPU=1
     CPU_ALLOW=100%
-    RAM=3002MB
+    RAM=2048MB
     DISK=40GB
     ;;
   elite)
     CPU=2
     CPU_ALLOW=200%
-    RAM=4500MB
+    RAM=3072MB
     DISK=50GB
     ;;
   supreme)
     CPU=2
     CPU_ALLOW=200%
-    RAM=6000MB
+    RAM=4096MB
     DISK=60GB
     ;;
   royal)
     CPU=3
     CPU_ALLOW=300%
-    RAM=7500MB
+    RAM=5120MB
     DISK=70GB
     ;;
   *)
