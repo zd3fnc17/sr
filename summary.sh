@@ -75,6 +75,6 @@ done
 
 cat <<'EOF'
 - jangan membuat paket melebihi batas
-- script versi 12.2
+- script versi 13.0, Rilis pada 7 Aug 2026
 ----
 EOF
