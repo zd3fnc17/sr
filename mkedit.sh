@@ -15,11 +15,11 @@ show_help() {
   echo "  ~/sr/mkedit.sh royal web1 web2"
   echo ""
   echo "Paket tersedia:"
-  echo "  standard  - 1 CPU, 2001MB RAM, 30GB Disk"
-  echo "  prime     - 1 CPU, 4002MB RAM, 50GB Disk"
-  echo "  elite     - 2 CPU, 6003MB RAM, 60GB Disk"
-  echo "  supreme   - 2 CPU, 8004MB RAM, 70GB Disk"
-  echo "  royal     - 3 CPU, 10005MB RAM, 80GB Disk"
+  echo "  standard  - 1 CPU, 1024MB RAM, 30GB Disk"
+  echo "  prime     - 1 CPU, 2048MB RAM, 40GB Disk"
+  echo "  elite     - 2 CPU, 3072MB RAM, 50GB Disk"
+  echo "  supreme   - 2 CPU, 4096MB RAM, 60GB Disk"
+  echo "  royal     - 3 CPU, 5120MB RAM, 70GB Disk"
   echo ""
   exit 0
 }
@@ -48,32 +48,32 @@ case "$PLAN" in
 
   standard)
     CPU=1
-    RAM=2001MB
+    RAM=1024MB
     DISK=30GB
     ;;
 
   prime)
     CPU=1
-    RAM=4002MB
-    DISK=50GB
+    RAM=2048MB
+    DISK=40GB
     ;;
 
   elite)
     CPU=2
-    RAM=6003MB
-    DISK=60GB
+    RAM=3072MB
+    DISK=50GB
     ;;
 
   supreme)
     CPU=2
-    RAM=8004MB
-    DISK=70GB
+    RAM=4096MB
+    DISK=60GB
     ;;
 
   royal)
     CPU=3
-    RAM=10005MB
-    DISK=80GB
+    RAM=5120MB
+    DISK=70GB
     ;;
 
   *)
